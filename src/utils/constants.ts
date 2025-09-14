@@ -6,7 +6,3 @@ export const API_URL = `${import.meta.env.VITE_API_ORIGIN}/api/weblarek`;
 которое хранится в объекте товара. */
 export const CDN_URL = `${import.meta.env.VITE_API_ORIGIN}/content/weblarek`;
 
-export const settings = {
-
-};
-
