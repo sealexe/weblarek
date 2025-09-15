@@ -25,7 +25,7 @@ export class Buyer {
   }
 
   validateData(): IBuyerValidation {
-    let validationData: IBuyerValidation = {} as IBuyerValidation;
+    const validationData: IBuyerValidation = {} as IBuyerValidation;
 
     if (!this.buyerData.address) {
       validationData.address = "Введите корректный адрес.";

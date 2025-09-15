@@ -31,7 +31,7 @@ export class Cart {
     }, 0);
   }
 
-  getProductExist(id: string): boolean {
+  isProductExist(id: string): boolean {
     return this.products.some((product) => product.id === id);
   }
 }

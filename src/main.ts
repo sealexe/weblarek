@@ -42,11 +42,11 @@ console.log(
 );
 console.log(
   "Товар присутствует в корзине: ",
-  cartModel.getProductExist("b06cde61-912f-4663-9751-09956c0eed67")
+  cartModel.isProductExist("b06cde61-912f-4663-9751-09956c0eed67")
 );
 console.log(
   "Товара в корзине нет: ",
-  cartModel.getProductExist("412bcf81-7e75-4e70-bdb9-d3c73c9803b7")
+  cartModel.isProductExist("412bcf81-7e75-4e70-bdb9-d3c73c9803b7")
 );
 
 cartModel.deleteProduct("b06cde61-912f-4663-9751-09956c0eed67");
