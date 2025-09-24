@@ -23,4 +23,10 @@ export abstract class Component<T> {
         Object.assign(this as object, data ?? {});
         return this.container;
     }
+
+     protected setText(element: HTMLElement, value: unknown) {
+        if (element) {
+            element.textContent = String(value);
+        }
+    }
 }

@@ -47,3 +47,4 @@ export interface IPostOrder extends IBuyer {
   total: number;
   items: string[];
 }
+
