@@ -3,6 +3,7 @@ import { Component } from "../base/Component";
 
 interface IBasket {
   basketList: HTMLElement[];
+  basketEmptyElement: HTMLElement;
   total: number;
 }
 
@@ -16,6 +17,10 @@ export class Basket extends Component<IBasket> {
     this.basketContainer = ensureElement<HTMLElement>('.basket__list', this.container);
     this.totalPrice = ensureElement<HTMLElement>('.basket__price', this.container);
     this.basketButton = ensureElement<HTMLButtonElement>('.basket__button', this.container);
+  }
+
+  set basketEmptyElement(value: HTMLElement) {
+    this.basketContainer.append(value);
   }
 
   set basketList(items: HTMLElement[]) {

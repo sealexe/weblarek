@@ -2,6 +2,9 @@ export type ApiPostMethods = "POST" | "PUT" | "DELETE";
 
 export interface ICardActions {
   onClick?: (event: MouseEvent) => void;
+  delClick?: (event: MouseEvent) => void;
+  addClick?: (event: MouseEvent) => void;
+  basketdelClick?: (event: MouseEvent) => void;
 };
 
 export interface IApi {

@@ -16,8 +16,8 @@ export class BaseCard<T extends IBaseCard> extends Component<T> {
     this.cardPrice = ensureElement<HTMLElement>('.card__price', this.container);
   }
 
-  set title(data: string){
-    this.setText(this.cardTitle, data);
+  set title(value: string){
+    this.setText(this.cardTitle, value);
   }
 
   set price(value: number) {
