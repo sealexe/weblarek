@@ -1,20 +1,24 @@
 import { IProduct } from "../../types";
+import { EventEmitter } from "../base/Events";
 
 export class Cart {
   protected products: IProduct[] = [];
 
-  constructor() {}
+  constructor(protected events: EventEmitter) {}
 
   addProduct(product: IProduct) {
     this.products.push(product);
+    this.events.emit('cart:changed');
   }
 
   deleteProduct(id: string) {
     this.products = this.products.filter((product) => product.id != id);
+    this.events.emit('cart:changed');
   }
 
   clearCart() {
     this.products = [];
+    this.events.emit('cart:changed');
   }
 
   getTotal(): number {

@@ -1,6 +1,6 @@
 import { ensureElement } from "../../utils/utils";
 import { Component } from "../base/Component";
-import { IEvents } from "../base/Events";
+import { EventEmitter, IEvents } from "../base/Events";
 
 interface IHeader {
   counter: number;
@@ -10,7 +10,7 @@ export class Header extends Component<IHeader> {
   protected basketButton: HTMLButtonElement;
   protected counterElement: HTMLElement;
 
-  constructor(protected events: IEvents, container: HTMLElement) {
+  constructor(container: HTMLElement, protected events: EventEmitter) {
     super(container);
 
     this.basketButton = ensureElement<HTMLButtonElement>('.header__basket', this.container);

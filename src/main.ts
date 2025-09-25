@@ -4,24 +4,40 @@ import { Catalog } from "./components/models/Catalog";
 import { Buyer } from "./components/models/Buyer";
 import { ProductsAPI } from "./components/models/ProductsApi";
 import "./scss/styles.scss";
-import { PaymentMethod } from "./types";
+import { IProduct, PaymentMethod } from "./types";
 import { API_URL } from "./utils/constants";
-import { apiProducts } from "./utils/data";
 import { Header } from "./components/view/Header";
 import { EventEmitter } from "./components/base/Events";
 import { ModalWindow } from "./components/view/ModalWindow";
 import { cloneTemplate } from "./utils/utils";
-import { BaseCard } from "./components/view/BaseCard";
 import { Gallery } from "./components/view/Gallery";
 import { CatalogCard } from "./components/view/CatalogCard";
+import { PreviewCard } from "./components/view/PreviewCard";
+import { Basket } from "./components/view/Basket";
+import { BasketCard } from "./components/view/BasketCard";
 
 const events = new EventEmitter();
 const productsModel = new Catalog(events);
+const cart = new Cart(events);
 
 const api = new Api(API_URL);
 const productsApi = new ProductsAPI(api);
-const gallery = new Gallery(document.querySelector('.page__wrapper') as HTMLElement);
+
+//Элементы разметки
+
 const cardCatalogTemplate = document.querySelector('#card-catalog') as HTMLTemplateElement;
+const modal = document.querySelector('.modal') as HTMLElement;
+const cardPreviewTemplate = document.querySelector('#card-preview') as HTMLTemplateElement;
+const basketTemplate = document.querySelector('#basket') as HTMLTemplateElement;
+const basketCardTemplate = document.querySelector('#card-basket') as HTMLTemplateElement;
+
+//Модели
+
+const gallery = new Gallery(document.querySelector('.page__wrapper') as HTMLElement);
+const header = new Header(document.querySelector('.header') as HTMLElement, events);
+const modalWindow = new ModalWindow(document.querySelector('.modal') as HTMLElement, events);
+const basket = new Basket(cloneTemplate(basketTemplate));
+
 
 productsApi
   .getProducts()
@@ -31,13 +47,78 @@ productsApi
   })
   .catch((err) => console.log(err));
 
-events.on('items:changed', () => {
-  const galleryCatalog = productsModel.getProducts()
-    .map(card => new CatalogCard(cloneTemplate(cardCatalogTemplate), events).render(card));
-  gallery.render({catalog: galleryCatalog});
+events.on('catalog:changed', () => {
+  const itemCards = productsModel.getProducts().map((item) => {
+    const card = new CatalogCard(cloneTemplate(cardCatalogTemplate), {
+      onClick: () => events.emit('card:select', item)
+    });
+    return card.render(item);
+  })
+  gallery.render({ catalog: itemCards });
+})
 
+events.on('card:select', (item: IProduct) => {
+  productsModel.setProductCard(item.id);
+  const card = new PreviewCard(cloneTemplate(cardPreviewTemplate), events);
+  const cardElement = card.render(item);
+  modalWindow.render({ content: cardElement });
+  modal.classList.toggle('modal_active');
 });
 
+events.on('modal:visible', () => {
+  modal.classList.toggle('modal_active');
+});
+
+events.on('basket:open', () => {
+  const basketElement = basket.render();
+  modalWindow.render({ content: basketElement });
+  modal.classList.toggle('modal_active');
+})
+
+// events.on('cart:changed', () => {
+//   const basketCards = cart.getProducts().map((item) => {
+//     const basketCard = new BasketCard(cloneTemplate(basketCardTemplate));
+//     return basketCard.render(item);
+//   })
+//   const totalSum = cart.getTotalSum();
+//   basket.render({ basketList: basketCards, total: totalSum});
+// })
+
+events.on('cart:changed', () => {
+  const basketCards = cart.getProducts().map((item) => {
+    const basketCard = new BasketCard(cloneTemplate(basketCardTemplate), {
+      onClick: () => events.emit('product:delete', item)
+    });
+    return basketCard.render(item);
+  })
+  const totalSum = cart.getTotalSum();
+  basket.render({ basketList: basketCards, total: totalSum});
+})
+
+events.on('product:add', () => {
+  cart.addProduct(productsModel.getProduct());
+  const total = cart.getTotal();
+  header.render({counter: total});
+});
+
+//
+
+events.on('product:delete', (item: IProduct) => {
+  console.log(item);
+  cart.deleteProduct(item.id)
+})
+
+
+// events.on('basket:open', () => {
+// //   // const basketCards = cart.getProducts().map((item) => {
+// //   //   const basketCard = new BasketCard(cloneTemplate(basketCardTemplate), events);
+// //   //   return basketCard.render(item);
+// //   // })
+// //   // const totalSum = cart.getTotalSum();
+// //   // const basketListElement = basket.render({ basketList: basketCards, total: totalSum});
+// //   // modalWindow.render({ content: basketListElement });
+// //   modal.classList.toggle('modal_active');
+// // })
 
 
 

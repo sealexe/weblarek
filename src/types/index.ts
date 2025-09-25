@@ -1,5 +1,9 @@
 export type ApiPostMethods = "POST" | "PUT" | "DELETE";
 
+export interface ICardActions {
+  onClick?: (event: MouseEvent) => void;
+};
+
 export interface IApi {
   get<T extends object>(uri: string): Promise<T>;
   post<T extends object>(

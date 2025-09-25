@@ -6,7 +6,7 @@ interface IBasket {
   total: number;
 }
 
-export class basket extends Component<IBasket> {
+export class Basket extends Component<IBasket> {
   protected basketContainer: HTMLElement;
   protected totalPrice: HTMLElement;
   protected basketButton: HTMLButtonElement;
@@ -18,7 +18,7 @@ export class basket extends Component<IBasket> {
     this.basketButton = ensureElement<HTMLButtonElement>('.basket__button', this.container);
   }
 
-  set list(items: HTMLElement[]) {
+  set basketList(items: HTMLElement[]) {
     this.basketContainer.replaceChildren(...items);
   }
 

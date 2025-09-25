@@ -16,7 +16,7 @@ export class Catalog {
 
   setProducts(products: IProduct[]) {
     this.products = products;
-    this.events.emit('items:changed');
+    this.events.emit('catalog:changed');
   }
 
   getProducts(): IProduct[] {
@@ -35,7 +35,6 @@ export class Catalog {
     if (selectedCard) {
       this.productCard = selectedCard;
     }
-    this.events.emit('items:changed');
   }
 
   getProduct(): IProduct {
