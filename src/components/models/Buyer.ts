@@ -14,7 +14,6 @@ export class Buyer {
 
   saveData(patch: Partial<IBuyer>): void {
     this.buyerData = { ...this.buyerData, ...patch };
-    //this.events.emit('items:changed');
   }
 
   getData(): IBuyer {
@@ -23,7 +22,6 @@ export class Buyer {
 
   clearData() {
     this.buyerData = {} as IBuyer;
-    //this.events.emit('items:changed');
   }
 
   validateData(): IBuyerValidation {

@@ -15,6 +15,8 @@ import { CatalogCard } from "./components/view/CatalogCard";
 import { PreviewCard } from "./components/view/PreviewCard";
 import { Basket } from "./components/view/Basket";
 import { BasketCard } from "./components/view/BasketCard";
+import { OrderForm } from "./components/view/OrderForm";
+import { ContactsForm } from "./components/view/ContactsForm";
 
 const events = new EventEmitter();
 const productsModel = new Catalog(events);
@@ -30,17 +32,19 @@ const modal = document.querySelector('.modal') as HTMLElement;
 const cardPreviewTemplate = document.querySelector('#card-preview') as HTMLTemplateElement;
 const basketTemplate = document.querySelector('#basket') as HTMLTemplateElement;
 const basketCardTemplate = document.querySelector('#card-basket') as HTMLTemplateElement;
+const orderTemplate = document.querySelector('#order') as HTMLTemplateElement;
+const contactsTemplate = document.querySelector('#contacts') as HTMLTemplateElement;
 
 //Модели
 
 const gallery = new Gallery(document.querySelector('.page__wrapper') as HTMLElement);
 const header = new Header(document.querySelector('.header') as HTMLElement, events);
 const modalWindow = new ModalWindow(document.querySelector('.modal') as HTMLElement, events);
-const basket = new Basket(cloneTemplate(basketTemplate));
-const previewCard = new PreviewCard(cloneTemplate(cardPreviewTemplate));
+const basket = new Basket(cloneTemplate(basketTemplate), events);
+const order = new OrderForm(cloneTemplate(orderTemplate), events);
+const contacts = new ContactsForm(cloneTemplate(contactsTemplate), events);
+
 // const basketCard = new BasketCard(cloneTemplate(basketCardTemplate));
-
-
 
 productsApi
   .getProducts()
@@ -153,6 +157,16 @@ events.on('product:delete', (item: IProduct) => {
 
 events.on('product:add', () => {
   cart.addProduct(productsModel.getProduct());
+})
+
+events.on('order:submit', () => {
+  const orderForm = order.render();
+  modalWindow.render({ content: orderForm });
+})
+
+events.on('form:submit', () => {
+  const contactsForm = contacts.render();
+  modalWindow.render({ content: contactsForm });
 })
 
 // ВСЕ СОБЫТИЯ В КОНСОЛЬ
