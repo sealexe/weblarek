@@ -22,10 +22,6 @@ export class PreviewCard extends CatalogCard<IPrewiewCard> {
       this.addDeleteButton.addEventListener('click', actions.addClick);
     }
 
-    // if (actions?.delClick) {
-    //   this.addDeleteButton.addEventListener('click', actions.delClick);
-    // }
-
   }
 
   set description(value: string) {
@@ -38,6 +34,5 @@ export class PreviewCard extends CatalogCard<IPrewiewCard> {
 
   set attribute(value: string) {
     this.addDeleteButton.setAttribute(value, value);
-    this.setText(this.addDeleteButton, 'Недоступно');
   }
 }

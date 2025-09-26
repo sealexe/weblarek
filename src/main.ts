@@ -50,8 +50,6 @@ productsApi
   })
   .catch((err) => console.log(err));
 
-
-
 events.on('catalog:changed', () => {
   const itemCards = productsModel.getProducts().map((item) => {
     const card = new CatalogCard(cloneTemplate(cardCatalogTemplate), {
@@ -64,72 +62,27 @@ events.on('catalog:changed', () => {
   gallery.render({ catalog: itemCards });
 });
 
-
-
-// events.on('card:select', (item: IProduct) => {
-//   productsModel.setProductCard(item.id);
-//   const productExist = cart.isProductExist(item.id);
-//   const card = new PreviewCard(cloneTemplate(cardPreviewTemplate), {
-//     addClick: () => {
-//       console.log('po')
-//       events.emit('product:add', item)
-//     }
-//   });
-//   if (productExist) {
-//     card.render({ buttonText: 'Удалить из корзины' })
-//   }
-//   if (item.price === null) {
-//     card.render({ attribute: 'disabled' })
-//   }
-//   const cardElement = card.render(item);
-//   modalWindow.render({ content: cardElement });
-//   modal.classList.toggle('modal_active');
-// });
-
-// events.on('card:select', (item: IProduct) => {
-//   productsModel.setProductCard(item.id);
-//   const card = new PreviewCard(cloneTemplate(cardPreviewTemplate), {
-//     addClick: () => {
-//       events.emit('product:add', item)
-//       const productExist = cart.isProductExist(item.id);
-//       console.log(productExist)
-//       if (productExist) {
-//         console.log('hey')
-//         card.render({ buttonText: 'Удалить из корзины' })
-//       }
-//       if (!productExist) {
-//         card.render({ buttonText: 'В корзину' })
-//       }
-//       if (item.price === null) {
-//         card.render({ attribute: 'disabled' })
-//       }
-//     }
-//   });
-//     const cardElement = card.render(item);
-//     modalWindow.render({ content: cardElement });
-//     modal.classList.toggle('modal_active');
-// });
-
 events.on('card:select', (item: IProduct) => {
   productsModel.setProductCard(item.id);
   const card = new PreviewCard(cloneTemplate(cardPreviewTemplate), {
     addClick: () => {
       const productExist = cart.isProductExist(item.id);
       if(productExist) {
-        events.emit('product:delete', item)
-        console.log('test_delete')
-        card.render({ buttonText: 'В корзину' })
+        events.emit('product:delete', item);
+        card.render({ buttonText: 'В корзину' });
       }
       if (!productExist) {
         events.emit('product:add')
-        console.log('test_add')
         card.render({ buttonText: 'Удалить из корзины' })
       }
     }
   });
-    const cardElement = card.render(item);
-    modalWindow.render({ content: cardElement });
-    modal.classList.toggle('modal_active');
+  if (item.price === null) {
+    card.render(({ attribute: 'disabled', buttonText: 'Недоступно' }));
+  }
+  const cardElement = card.render(item);
+  modalWindow.render({ content: cardElement });
+  modal.classList.toggle('modal_active');
 });
 
 events.on('modal:visible', () => {
@@ -140,9 +93,12 @@ events.on('basket:open', () => {
   const basketElement = basket.render();
   modalWindow.render({ content: basketElement });
   modal.classList.toggle('modal_active');
+  events.emit('cart:changed');
 })
 
 events.on('cart:changed', () => {
+  const totalSum = cart.getTotalSum();
+  const total = cart.getTotal();
   const basketCards = cart.getProducts().map((item, idx) => {
     const basketCard = new BasketCard(cloneTemplate(basketCardTemplate), {
       delClick: () => events.emit('product:delete', item)
@@ -150,15 +106,16 @@ events.on('cart:changed', () => {
     basketCard.render({ index: idx + 1 });
     return basketCard.render(item);
   });
-  const totalSum = cart.getTotalSum();
-  const total = cart.getTotal();
-  basket.render({ basketList: basketCards, total: totalSum});
-  header.render({counter: total});
   if (cart.getProducts().length === 0) {
     const emptyElement = document.createElement('p');
+    emptyElement.style.color = 'rgba(255, 255, 255, 0.3)'
     emptyElement.textContent = 'Корзина пуста';
-    basket.render({ basketEmptyElement: emptyElement })
+    basket.render({ basketEmptyElement: emptyElement, disabled: 'disabled'})
+  } else {
+    basket.render({ basketList: basketCards, total: totalSum, abled: 'disabled'});
+    header.render({counter: total});
   }
+
 });
 
 events.on('product:delete', (item: IProduct) => {
@@ -168,6 +125,12 @@ events.on('product:delete', (item: IProduct) => {
 events.on('product:add', () => {
   cart.addProduct(productsModel.getProduct());
 })
+
+// ВСЕ СОБЫТИЯ В КОНСОЛЬ
+
+// events.onAll(({ eventName, data }) => {
+//     console.log(eventName, data); // все события в консоль
+// })
 
 
 

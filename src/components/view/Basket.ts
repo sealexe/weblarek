@@ -5,6 +5,8 @@ interface IBasket {
   basketList: HTMLElement[];
   basketEmptyElement: HTMLElement;
   total: number;
+  disabled: string;
+  abled: string;
 }
 
 export class Basket extends Component<IBasket> {
@@ -20,7 +22,7 @@ export class Basket extends Component<IBasket> {
   }
 
   set basketEmptyElement(value: HTMLElement) {
-    this.basketContainer.append(value);
+    this.basketContainer.replaceChildren(value);
   }
 
   set basketList(items: HTMLElement[]) {
@@ -29,5 +31,13 @@ export class Basket extends Component<IBasket> {
 
   set total(value: number) {
     this.setText(this.totalPrice, `${value} синапсов`);
+  }
+
+  set disabled(value: string) {
+    this.basketButton.setAttribute(value, value);
+  }
+
+  set abled(value: string) {
+    this.basketButton.removeAttribute(value);
   }
 }
