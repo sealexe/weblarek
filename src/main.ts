@@ -62,6 +62,29 @@ events.on('catalog:changed', () => {
   gallery.render({ catalog: itemCards });
 });
 
+// events.on('card:select', (item: IProduct) => {
+//   productsModel.setProductCard(item.id);
+//   const card = new PreviewCard(cloneTemplate(cardPreviewTemplate), {
+//     addClick: () => {
+//       const productExist = cart.isProductExist(item.id);
+//       if(productExist) {
+//         events.emit('product:delete', item);
+//         card.render({ buttonText: 'В корзину' });
+//       }
+//       if (!productExist) {
+//         events.emit('product:add')
+//         card.render({ buttonText: 'Удалить из корзины' })
+//       }
+//     }
+//   });
+//   if (item.price === null) {
+//     card.render(({ attribute: 'disabled', buttonText: 'Недоступно' }));
+//   }
+//   const cardElement = card.render(item);
+//   modalWindow.render({ content: cardElement });
+//   events.emit('modal:visible');
+// });
+
 events.on('card:select', (item: IProduct) => {
   productsModel.setProductCard(item.id);
   const card = new PreviewCard(cloneTemplate(cardPreviewTemplate), {
@@ -77,12 +100,17 @@ events.on('card:select', (item: IProduct) => {
       }
     }
   });
+  const productExist = cart.isProductExist(item.id);
   if (item.price === null) {
     card.render(({ attribute: 'disabled', buttonText: 'Недоступно' }));
+  } else if (productExist) {
+    card.render({ ...item, buttonText: 'Удалить из корзины' })
+  } else {
+    card.render({ ...item, buttonText: 'В корзину' })
   }
   const cardElement = card.render(item);
   modalWindow.render({ content: cardElement });
-  modal.classList.toggle('modal_active');
+  events.emit('modal:visible');
 });
 
 events.on('modal:visible', () => {
@@ -111,6 +139,7 @@ events.on('cart:changed', () => {
     emptyElement.style.color = 'rgba(255, 255, 255, 0.3)'
     emptyElement.textContent = 'Корзина пуста';
     basket.render({ basketEmptyElement: emptyElement, disabled: 'disabled'})
+    header.render({ counter: total })
   } else {
     basket.render({ basketList: basketCards, total: totalSum, abled: 'disabled'});
     header.render({counter: total});
