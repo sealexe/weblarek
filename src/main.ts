@@ -55,37 +55,81 @@ productsApi
 events.on('catalog:changed', () => {
   const itemCards = productsModel.getProducts().map((item) => {
     const card = new CatalogCard(cloneTemplate(cardCatalogTemplate), {
-      onClick: () => events.emit('card:select', item)
+      onClick: () => {
+        events.emit('card:select', item)
+      }
     });
     return card.render(item);
   })
   gallery.render({ catalog: itemCards });
 });
 
+
+
 // events.on('card:select', (item: IProduct) => {
 //   productsModel.setProductCard(item.id);
-//   const isProductExist = cart.isProductExist(item.id);
-//   const card = new PreviewCard(cloneTemplate(cardPreviewTemplate), events);
-//   if (isProductExist) {
-//     card.render({ buttonText: 'Удалить из корзины' });
+//   const productExist = cart.isProductExist(item.id);
+//   const card = new PreviewCard(cloneTemplate(cardPreviewTemplate), {
+//     addClick: () => {
+//       console.log('po')
+//       events.emit('product:add', item)
+//     }
+//   });
+//   if (productExist) {
+//     card.render({ buttonText: 'Удалить из корзины' })
+//   }
+//   if (item.price === null) {
+//     card.render({ attribute: 'disabled' })
 //   }
 //   const cardElement = card.render(item);
 //   modalWindow.render({ content: cardElement });
 //   modal.classList.toggle('modal_active');
 // });
 
+// events.on('card:select', (item: IProduct) => {
+//   productsModel.setProductCard(item.id);
+//   const card = new PreviewCard(cloneTemplate(cardPreviewTemplate), {
+//     addClick: () => {
+//       events.emit('product:add', item)
+//       const productExist = cart.isProductExist(item.id);
+//       console.log(productExist)
+//       if (productExist) {
+//         console.log('hey')
+//         card.render({ buttonText: 'Удалить из корзины' })
+//       }
+//       if (!productExist) {
+//         card.render({ buttonText: 'В корзину' })
+//       }
+//       if (item.price === null) {
+//         card.render({ attribute: 'disabled' })
+//       }
+//     }
+//   });
+//     const cardElement = card.render(item);
+//     modalWindow.render({ content: cardElement });
+//     modal.classList.toggle('modal_active');
+// });
+
 events.on('card:select', (item: IProduct) => {
   productsModel.setProductCard(item.id);
-  const productExist = cart.isProductExist(item.id);
   const card = new PreviewCard(cloneTemplate(cardPreviewTemplate), {
-    addClick: () => events.emit('product:add', item),
+    addClick: () => {
+      const productExist = cart.isProductExist(item.id);
+      if(productExist) {
+        events.emit('product:delete', item)
+        console.log('test_delete')
+        card.render({ buttonText: 'В корзину' })
+      }
+      if (!productExist) {
+        events.emit('product:add')
+        console.log('test_add')
+        card.render({ buttonText: 'Удалить из корзины' })
+      }
+    }
   });
-  if (productExist) {
-    card.render({ buttonText: 'Удалить из корзины' })
-  }
-  const cardElement = card.render(item);
-  modalWindow.render({ content: cardElement });
-  modal.classList.toggle('modal_active');
+    const cardElement = card.render(item);
+    modalWindow.render({ content: cardElement });
+    modal.classList.toggle('modal_active');
 });
 
 events.on('modal:visible', () => {

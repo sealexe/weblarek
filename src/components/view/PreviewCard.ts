@@ -6,6 +6,7 @@ import { CatalogCard, ICatalogCard } from "./CatalogCard";
 interface IPrewiewCard extends ICatalogCard {
   description: string;
   buttonText: string;
+  attribute: string;
 }
 
 export class PreviewCard extends CatalogCard<IPrewiewCard> {
@@ -21,9 +22,9 @@ export class PreviewCard extends CatalogCard<IPrewiewCard> {
       this.addDeleteButton.addEventListener('click', actions.addClick);
     }
 
-    if (actions?.delClick) {
-      this.addDeleteButton.addEventListener('click', actions.delClick);
-    }
+    // if (actions?.delClick) {
+    //   this.addDeleteButton.addEventListener('click', actions.delClick);
+    // }
 
   }
 
@@ -33,5 +34,10 @@ export class PreviewCard extends CatalogCard<IPrewiewCard> {
 
   set buttonText(value: string) {
     this.setText(this.addDeleteButton, value);
+  }
+
+  set attribute(value: string) {
+    this.addDeleteButton.setAttribute(value, value);
+    this.setText(this.addDeleteButton, 'Недоступно');
   }
 }
