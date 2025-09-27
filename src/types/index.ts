@@ -38,11 +38,12 @@ export interface IBuyer {
   address: string;
 }
 
+
 export interface IBuyerValidation {
-  address: string | undefined;
-  email: string | undefined;
-  phone: string | undefined;
-  payment: string | undefined;
+  address: string;
+  email: string;
+  phone: string;
+  payment: string;
 }
 
 export interface IResponseProducts extends IProduct {

@@ -1,9 +1,10 @@
 import { IBuyer, IBuyerValidation, PaymentMethod } from "../../types";
+import { EventEmitter } from "../base/Events";
 
 export class Buyer {
   protected buyerData: IBuyer;
 
-  constructor(initialData?: Partial<IBuyer>) {
+  constructor(protected events: EventEmitter, initialData?: Partial<IBuyer>) {
     this.buyerData = {
       payment: initialData?.payment ?? PaymentMethod.Null,
       address: initialData?.address ?? "",
@@ -14,6 +15,9 @@ export class Buyer {
 
   saveData(patch: Partial<IBuyer>): void {
     this.buyerData = { ...this.buyerData, ...patch };
+    if (this.validateOrder()) {
+      this.events.emit('order:ready', this.buyerData);
+    }
   }
 
   getData(): IBuyer {
@@ -24,30 +28,27 @@ export class Buyer {
     this.buyerData = {} as IBuyer;
   }
 
-  validateData(): IBuyerValidation {
-    const validationData: IBuyerValidation = {} as IBuyerValidation;
+  validateOrder() {
+    const errors: IBuyerValidation = {} as IBuyerValidation;
 
     if (!this.buyerData.payment || this.buyerData.payment === ("" as PaymentMethod)) {
-      validationData.payment = "Выберите способ оплаты";
+      errors.payment = "Выберите способ оплаты";
     }
 
     if (!this.buyerData.address) {
-      validationData.address = "Введите корректный адрес";
+      errors.address = "Введите корректный адрес";
     }
 
     if (!this.buyerData.email) {
-      validationData.email = "Введите корректный e-mail";
+      errors.email = "Введите корректный e-mail";
     }
 
     if (!this.buyerData.phone) {
-      validationData.phone = "Введите корректный телефон";
+      errors.phone = "Введите корректный телефон";
     }
 
-    return validationData;
+    this.events.emit('formErrors:change', errors)
+    return Object.keys(errors).length === 0;
   }
 
-  isValid(): boolean  {
-    const errors = this.validateData();
-    return Object.keys(errors).length ===0;
-  }
 }

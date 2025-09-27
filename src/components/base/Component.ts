@@ -24,9 +24,14 @@ export abstract class Component<T> {
         return this.container;
     }
 
-     protected setText(element: HTMLElement, value: unknown) {
+    protected setText(element: HTMLElement, value: unknown) {
         if (element) {
             element.textContent = String(value);
         }
+    }
+
+    // Переключить класс
+    toggleClass(element: HTMLElement, className: string, force?: boolean) {
+        element.classList.toggle(className, force);
     }
 }
