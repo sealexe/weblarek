@@ -21,6 +21,7 @@ import { ContactsForm } from "./components/view/ContactsForm";
 const events = new EventEmitter();
 const productsModel = new Catalog(events);
 const cart = new Cart(events);
+const buyer = new Buyer();
 
 const api = new Api(API_URL);
 const productsApi = new ProductsAPI(api);
@@ -65,29 +66,6 @@ events.on('catalog:changed', () => {
   })
   gallery.render({ catalog: itemCards });
 });
-
-// events.on('card:select', (item: IProduct) => {
-//   productsModel.setProductCard(item.id);
-//   const card = new PreviewCard(cloneTemplate(cardPreviewTemplate), {
-//     addClick: () => {
-//       const productExist = cart.isProductExist(item.id);
-//       if(productExist) {
-//         events.emit('product:delete', item);
-//         card.render({ buttonText: 'В корзину' });
-//       }
-//       if (!productExist) {
-//         events.emit('product:add')
-//         card.render({ buttonText: 'Удалить из корзины' })
-//       }
-//     }
-//   });
-//   if (item.price === null) {
-//     card.render(({ attribute: 'disabled', buttonText: 'Недоступно' }));
-//   }
-//   const cardElement = card.render(item);
-//   modalWindow.render({ content: cardElement });
-//   events.emit('modal:visible');
-// });
 
 events.on('card:select', (item: IProduct) => {
   productsModel.setProductCard(item.id);
@@ -160,9 +138,48 @@ events.on('product:add', () => {
 })
 
 events.on('order:submit', () => {
-  const orderForm = order.render();
+  const validation = buyer.validateData();
+  const isValid = buyer.isValid();
+
+  const orderForm = order.render({
+    ...buyer.getData(),
+    errors: validation,
+    valid: isValid,
+    buttonState: isValid
+  });
   modalWindow.render({ content: orderForm });
 })
+
+events.on('order:payment:change', (data: { payment: PaymentMethod }) => {
+  console.log(buyer.getData())
+  buyer.saveData({payment: data.payment});
+
+  const validation = buyer.validateData();
+  const isValid = buyer.isValid();
+
+  order.render({
+    ...buyer.getData(),
+    errors: validation,
+    valid: isValid,
+    buttonState: isValid
+  })
+
+})
+
+events.on('order:address:change', (data: { address: string }) => {
+  buyer.saveData({ address: data.address });
+
+  const validation = buyer.validateData();
+  const isValid = buyer.isValid();
+  console.log(isValid)
+
+  order.render({
+    ...buyer.getData(),
+    errors: validation,
+    valid: isValid,
+    buttonState: isValid
+  });
+});
 
 events.on('form:submit', () => {
   const contactsForm = contacts.render();

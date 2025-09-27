@@ -1,11 +1,10 @@
-import { IBuyerValidation } from "../../types";
 import { ensureElement } from "../../utils/utils";
 import { Component } from "../base/Component";
 import { EventEmitter } from "../base/Events";
 
 export interface IBaseForm {
-  errors: IBuyerValidation;
   valid: boolean;
+  buttonState: boolean;
 }
 
 export class BaseForm<T extends IBaseForm> extends Component<T> {
@@ -22,8 +21,8 @@ export class BaseForm<T extends IBaseForm> extends Component<T> {
 
   }
 
-  set errors(value: string) {
-    this.errorsForm.replaceChildren(value);
+  set buttonState(value: boolean) {
+    this.submit.disabled = !value;
   }
 
 }
