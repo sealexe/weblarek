@@ -4,7 +4,7 @@ import { Catalog } from "./components/models/Catalog";
 import { Buyer } from "./components/models/Buyer";
 import { ProductsAPI } from "./components/models/ProductsApi";
 import "./scss/styles.scss";
-import { IProduct, PaymentMethod } from "./types";
+import { IBuyerValidation, IProduct, PaymentMethod } from "./types";
 import { API_URL } from "./utils/constants";
 import { Header } from "./components/view/Header";
 import { EventEmitter } from "./components/base/Events";
@@ -17,6 +17,7 @@ import { Basket } from "./components/view/Basket";
 import { BasketCard } from "./components/view/BasketCard";
 import { OrderForm } from "./components/view/OrderForm";
 import { ContactsForm } from "./components/view/ContactsForm";
+import { OrderSuccess } from "./components/view/OrderSuccess";
 
 const events = new EventEmitter();
 const productsModel = new Catalog(events);
@@ -35,6 +36,7 @@ const basketTemplate = document.querySelector('#basket') as HTMLTemplateElement;
 const basketCardTemplate = document.querySelector('#card-basket') as HTMLTemplateElement;
 const orderTemplate = document.querySelector('#order') as HTMLTemplateElement;
 const contactsTemplate = document.querySelector('#contacts') as HTMLTemplateElement;
+const successTemplate = document.querySelector('#success') as HTMLTemplateElement;
 
 //Модели
 
@@ -44,6 +46,7 @@ const modalWindow = new ModalWindow(document.querySelector('.modal') as HTMLElem
 const basket = new Basket(cloneTemplate(basketTemplate), events);
 const order = new OrderForm(cloneTemplate(orderTemplate), events);
 const contacts = new ContactsForm(cloneTemplate(contactsTemplate), events);
+const success = new OrderSuccess(cloneTemplate(successTemplate), events);
 
 // const basketCard = new BasketCard(cloneTemplate(basketCardTemplate));
 
@@ -137,54 +140,132 @@ events.on('product:add', () => {
   cart.addProduct(productsModel.getProduct());
 })
 
-events.on('order:submit', () => {
-  const validation = buyer.validateData();
-  const isValid = buyer.isValid();
+events.on('order:open', () => {
+  const isValid = isOrderFieldsValid();
 
   const orderForm = order.render({
     ...buyer.getData(),
-    errors: validation,
-    valid: isValid,
     buttonState: isValid
   });
   modalWindow.render({ content: orderForm });
 })
 
-events.on('order:payment:change', (data: { payment: PaymentMethod }) => {
-  console.log(buyer.getData())
-  buyer.saveData({payment: data.payment});
+function validateOrderFields(): IBuyerValidation {
+  const buyerData = buyer.getData();
+  const validationData: IBuyerValidation = {} as IBuyerValidation;
 
-  const validation = buyer.validateData();
-  const isValid = buyer.isValid();
+  if (!buyerData.payment || buyerData.payment === ("" as PaymentMethod)) {
+    validationData.payment = "Выберите способ оплаты";
+  }
 
-  order.render({
+  if (!buyerData.address) {
+    validationData.address = "Введите корректный адрес";
+  }
+
+  return validationData;
+}
+
+function isOrderFieldsValid(): boolean {
+  const errors = validateOrderFields();
+  return Object.keys(errors).length === 0;
+}
+
+function updateForm(formName: string, validation: IBuyerValidation, isValid: boolean) {
+  const formData = {
     ...buyer.getData(),
     errors: validation,
     valid: isValid,
     buttonState: isValid
-  })
+  };
 
+  if (formName === 'order') {
+    const orderForm = order.render(formData);
+    modalWindow.render({ content: orderForm });
+  } else if (formName === 'contacts') {
+    const contactsForm = contacts.render(formData);
+    modalWindow.render({ content: contactsForm });
+  }
+}
+
+// Общий обработчик для всех форм
+events.on('form:submit', (data: { formName: string }) => {
+  const validation = buyer.validateData();
+  const isValid = buyer.isValid();
+
+  if (data.formName === 'order') {
+    const orderValidation = validateOrderFields();
+    const isOrderValid = isOrderFieldsValid();
+
+    if (isOrderValid) {
+      // Переходим к форме контактов
+      const contactsForm = contacts.render({
+        ...buyer.getData(),
+        errors: {} as IBuyerValidation,
+        valid: true,
+        buttonState: false
+      });
+      modalWindow.render({ content: contactsForm });
+    } else {
+      updateForm('order', orderValidation, isOrderValid);
+    }
+  } else if (data.formName === 'contacts') {
+    if (isValid) {
+      const total = cart.getTotalSum();
+      const items =  cart.getProducts().map(product => product.id);
+      const buyerData = buyer.getData();
+      const order = { total, items, ...buyerData };
+      // Отправляем заказ
+      console.log('Заказ отправлен:', order);
+      // Здесь можно добавить отправку на сервер
+      productsApi.postOrder(order)
+        .then(data => console.log(data));
+
+      const successElement = success.render({amount: total });
+      modalWindow.render({ content: successElement });
+
+    } else {
+      updateForm('contacts', validation, isValid);
+    }
+  }
+})
+
+events.on('order:payment:change', (data: { payment: PaymentMethod }) => {
+  buyer.saveData({payment: data.payment});
+  const validation = validateOrderFields();
+  const isValid = isOrderFieldsValid();
+  updateForm('order', validation, isValid);
 })
 
 events.on('order:address:change', (data: { address: string }) => {
   buyer.saveData({ address: data.address });
-
-  const validation = buyer.validateData();
-  const isValid = buyer.isValid();
-  console.log(isValid)
-
-  order.render({
-    ...buyer.getData(),
-    errors: validation,
-    valid: isValid,
-    buttonState: isValid
-  });
+  const validation = validateOrderFields();
+  const isValid = isOrderFieldsValid();
+  updateForm('order', validation, isValid);
 });
 
-events.on('form:submit', () => {
-  const contactsForm = contacts.render();
-  modalWindow.render({ content: contactsForm });
+// Обработчики для формы контактов
+events.on('contacts:email:change', (data: { email: string }) => {
+  buyer.saveData({ email: data.email });
+  const validation = buyer.validateData();
+  const isValid = buyer.isValid();
+  updateForm('contacts', validation, isValid);
+});
+
+events.on('contacts:phone:change', (data: { phone: string }) => {
+  buyer.saveData({ phone: data.phone });
+  const validation = buyer.validateData();
+  const isValid = buyer.isValid();
+  updateForm('contacts', validation, isValid);
+});
+
+events.on('order:end', () => {
+  cart.clearCart();
+  events.emit('modal:visible');
 })
+
+
+
+
 
 // ВСЕ СОБЫТИЯ В КОНСОЛЬ
 

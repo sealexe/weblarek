@@ -13,6 +13,7 @@ export class OrderForm extends BaseForm<IOrderForm> {
   protected cashButton: HTMLButtonElement;
   protected cardButton: HTMLButtonElement;
   protected addressInput: HTMLInputElement;
+  protected orderButton: HTMLButtonElement;
 
   constructor(protected container: HTMLFormElement, events: EventEmitter) {
     super(container, events)
@@ -20,6 +21,7 @@ export class OrderForm extends BaseForm<IOrderForm> {
     this.cashButton = ensureElement<HTMLButtonElement>('button[name="cash"]', this.container);
     this.cardButton = ensureElement<HTMLButtonElement>('button[name="card"]', this.container);
     this.addressInput = ensureElement<HTMLInputElement>('input[name="address"]', this.container);
+    this.orderButton = ensureElement<HTMLButtonElement>('.order__button', this.container);
 
     this.cashButton.addEventListener('click', () => {
       this.events.emit('order:payment:change', { payment: PaymentMethod.Cash });
@@ -35,7 +37,7 @@ export class OrderForm extends BaseForm<IOrderForm> {
 
     this.container.addEventListener('submit', (e) => {
       e.preventDefault();
-      this.events.emit('form:submit');
+      this.events.emit('form:submit', { formName: 'order' });
     })
   }
 

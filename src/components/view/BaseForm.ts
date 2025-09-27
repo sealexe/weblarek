@@ -17,8 +17,6 @@ export class BaseForm<T extends IBaseForm> extends Component<T> {
     this.submit = ensureElement<HTMLButtonElement>('button[type=submit]', this.container);
     this.errorsForm = ensureElement<HTMLElement>('.form__errors', this.container);
 
-    this.submit.addEventListener('click', () => this.events.emit('form:submit'));
-
   }
 
   set buttonState(value: boolean) {
