@@ -47,7 +47,8 @@ export class Buyer {
       errors.phone = "Введите корректный телефон";
     }
 
-    this.events.emit('formErrors:change', errors)
+    this.events.emit('formErrors:change', errors);
+    
     return Object.keys(errors).length === 0;
   }
 

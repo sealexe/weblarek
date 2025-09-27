@@ -16,7 +16,7 @@ import { PreviewCard } from "./components/view/PreviewCard";
 import { Basket } from "./components/view/Basket";
 import { BasketCard } from "./components/view/BasketCard";
 import { OrderSuccess } from "./components/view/OrderSuccess";
-import { OrderForm } from "./components/view/Form";
+import { ContactsForm, OrderForm } from "./components/view/Form";
 
 const events = new EventEmitter();
 const productsModel = new Catalog(events);
@@ -44,6 +44,7 @@ const header = new Header(document.querySelector('.header') as HTMLElement, even
 const modalWindow = new ModalWindow(document.querySelector('.modal') as HTMLElement, events);
 const basket = new Basket(cloneTemplate(basketTemplate), events);
 const order = new OrderForm(cloneTemplate(orderTemplate), events);
+const contacts = new ContactsForm(cloneTemplate(contactsTemplate), events);
 const success = new OrderSuccess(cloneTemplate(successTemplate), events);
 
 // const basketCard = new BasketCard(cloneTemplate(basketCardTemplate));
@@ -143,16 +144,48 @@ events.on('order:open', () => {
   modalWindow.render({ content: orderForm });
 });
 
-events.on('formErrors:change', (errors: Partial<IBuyerValidation>) => {
-    const { address, payment } = errors;
-    const errorsElement = [address, payment].filter(value => value !== undefined);
-    console.log('состояние валидации', !address && !payment)
-    order.render({ errors: errorsElement, valid: !address && !payment })
-    console.log(buyer.getData())
+events.on('contacts:submit', () => {
+  const total = cart.getTotalSum();
+  const items =  cart.getProducts().map(product => product.id);
+  const buyerData = buyer.getData();
+  const order = { total, items, ...buyerData };
+  // Отправляем заказ
+  console.log('Заказ отправлен:', order);
+  // Здесь можно добавить отправку на сервер
+  productsApi
+    .postOrder(order)
+    .then(data => console.log(data))
+    .catch((err) => console.log(err));
+  const successElement = success.render({ amount: total });
+  modalWindow.render({ content: successElement });
+})
 
+// events.on('formErrors:change', (errors: Partial<IBuyerValidation>) => {
+//     const { address, payment } = errors;
+//     const errorsElement = [address, payment].filter(value => value !== undefined);
+//     console.log('состояние валидации', !address && !payment)
+//     order.render({ errors: errorsElement, valid: !address && !payment })
+//     console.log(buyer.getData())
+
+// });
+
+events.on('formErrors:change', (errors: Partial<IBuyerValidation>) => {
+    const { address, payment, email, phone } = errors;
+
+    const orderErrors = [address, payment].filter(value => value !== undefined);
+    const contactsErrors = [email, phone].filter(value => value !== undefined);
+
+    order.render({ errors: orderErrors, valid: !address && !payment });
+    contacts.render({ errors: contactsErrors, valid: !email && !phone });
+
+    console.log('Данные покупателя', buyer.getData())
 });
 
 events.on(/^order\..*:change/, (data: { field: keyof IBuyer, value: string}) => {
+    buyer.saveData({ [data.field]: data.value });
+});
+
+events.on(/^contacts\..*:change/, (data: { field: keyof IBuyer, value: string}) => {
     buyer.saveData({ [data.field]: data.value });
 });
 
@@ -161,8 +194,14 @@ events.on('order.payment:change', (data: { payment: PaymentMethod }) => {
   order.render({ payment: data.payment })
 })
 
-events.on('form:submit', () => {
-  console.log('hey')
+events.on('order:submit', () => {
+  const contactsElement = contacts.render();
+  modalWindow.render({content: contactsElement})
+})
+
+events.on('order:end', () => {
+  cart.clearCart();
+  events.emit('modal:visible');
 })
 
 
@@ -280,10 +319,7 @@ events.on('form:submit', () => {
 //   updateForm('contacts', validation, isValid);
 // });
 
-events.on('order:end', () => {
-  cart.clearCart();
-  events.emit('modal:visible');
-})
+
 
 
 

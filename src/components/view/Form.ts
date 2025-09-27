@@ -27,8 +27,7 @@ export class BaseForm<T extends IBaseForm> extends Component<T> {
 
     this.container.addEventListener('submit', (e) => {
         e.preventDefault();
-        // this.events.emit(`${this.container.name}:submit`);
-        this.events.emit('form:submit');
+        this.events.emit(`${this.container.name}:submit`);
     });
 
   }
@@ -43,12 +42,16 @@ export class BaseForm<T extends IBaseForm> extends Component<T> {
   set valid(value: boolean) {
     this.submit.disabled = !value;
   }
+
+  set errors(value: string[]) {
+    this.setText(this.errorsForm, value.join(' '));
+  }
+
 }
 
 interface IOrderForm extends IBaseForm {
   address: string;
   payment: string;
-
 }
 
 export class OrderForm extends BaseForm<IOrderForm> {
@@ -87,10 +90,6 @@ export class OrderForm extends BaseForm<IOrderForm> {
     this.addressInput.value = value;
   }
 
-  set errors(value: string[]) {
-    this.setText(this.errorsForm, value.join(' '));
-  }
-
 }
 
 interface IContactsForm extends IBaseForm {
@@ -110,6 +109,14 @@ export class ContactsForm extends BaseForm<IContactsForm> {
     this.phoneInput = ensureElement<HTMLInputElement>('input[name="phone"]', this.container);
     this.payButton = ensureElement<HTMLButtonElement>('button[type="submit"]', this.container);
 
-    
   }
+
+  set email(value: string) {
+    this.emailInput.value = value;
+  }
+
+  set phone(value: string) {
+    this.phoneInput.value = value;
+  }
+
 }
