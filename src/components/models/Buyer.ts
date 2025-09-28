@@ -15,9 +15,6 @@ export class Buyer {
 
   saveData(patch: Partial<IBuyer>): void {
     this.buyerData = { ...this.buyerData, ...patch };
-    if (this.validateOrder()) {
-      this.events.emit('order:ready', this.buyerData);
-    }
   }
 
   getData(): IBuyer {
@@ -48,7 +45,7 @@ export class Buyer {
     }
 
     this.events.emit('formErrors:change', errors);
-    
+
     return Object.keys(errors).length === 0;
   }
 

@@ -72,11 +72,15 @@ events.on("catalog:changed", () => {
 
 events.on("card:select", (item: IProduct) => {
   productsModel.setProductCard(item.id);
+});
+
+events.on('preview:open', () => {
+  const product = productsModel.getProduct();
   const card = new PreviewCard(cloneTemplate(cardPreviewTemplate), {
     addClick: () => {
-      const productExist = cart.isProductExist(item.id);
+      const productExist = cart.isProductExist(product.id);
       if (productExist) {
-        events.emit("product:delete", item);
+        events.emit("product:delete", product);
         card.render({ buttonText: "В корзину" });
       }
       if (!productExist) {
@@ -85,24 +89,23 @@ events.on("card:select", (item: IProduct) => {
       }
     },
   });
-  const productExist = cart.isProductExist(item.id);
-  if (item.price === null) {
+  const productExist = cart.isProductExist(product.id);
+  if (product.price === null) {
     card.render({ attribute: "disabled", buttonText: "Недоступно" });
   } else if (productExist) {
-    card.render({ ...item, buttonText: "Удалить из корзины" });
+    card.render({ ...product, buttonText: "Удалить из корзины" });
   } else {
-    card.render({ ...item, buttonText: "В корзину" });
+    card.render({ ...product, buttonText: "В корзину" });
   }
-  const cardElement = card.render(item);
+  const cardElement = card.render(product);
   modalWindow.render({ content: cardElement });
   modalWindow.open();
-});
+})
 
 events.on("basket:open", () => {
   const basketElement = basket.render();
   modalWindow.render({ content: basketElement });
   modalWindow.open();
-  events.emit("cart:changed");
 });
 
 events.on("cart:changed", () => {

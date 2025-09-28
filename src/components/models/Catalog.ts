@@ -35,6 +35,7 @@ export class Catalog {
     if (selectedCard) {
       this.productCard = selectedCard;
     }
+    this.events.emit('preview:open');
   }
 
   getProduct(): IProduct {
