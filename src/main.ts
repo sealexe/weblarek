@@ -122,8 +122,7 @@ events.on("cart:changed", () => {
   basket.render({
     basketList: basketCards,
     total: totalSum,
-    valid: !productstotal,
-    empty: !productstotal
+    state: !productstotal
   });
   header.render({ counter: productstotal });
 });
@@ -180,14 +179,14 @@ events.on("contacts:submit", () => {
   const buyerData = buyer.getData();
   const order = { total, items, ...buyerData };
 
-  productsApi.postOrder(order)
-    .then((data) => {
-      const successElement = success.render({ amount: data.total });
-      modalWindow.render({ content: successElement });
-      cart.clearCart();
-      buyer.clearData();
-    })
-    .catch((err) => console.log(err));
+productsApi.postOrder(order)
+  .then((data) => {
+    const successElement = success.render({ amount: data.total });
+    modalWindow.render({ content: successElement });
+    cart.clearCart();
+    buyer.clearData();
+  })
+  .catch((err) => console.log(err));
 });
 
 events.on("order:end", () => {

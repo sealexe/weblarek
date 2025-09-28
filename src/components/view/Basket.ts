@@ -6,8 +6,7 @@ interface IBasket {
   basketList: HTMLElement[];
   basketEmptyElement: HTMLElement;
   total: number;
-  valid: boolean;
-  empty: boolean;
+  state: boolean;
 }
 
 export class Basket extends Component<IBasket> {
@@ -44,17 +43,15 @@ export class Basket extends Component<IBasket> {
     this.setText(this.totalPrice, `${value} синапсов`);
   }
 
-  set valid(value: boolean) {
-    this.basketButton.disabled = value;
-  }
-
-  set empty(value: boolean) {
+  set state(value: boolean) {
     if (value) {
       const emptyElement = document.createElement("p");
       emptyElement.style.color = "rgba(255, 255, 255, 0.3)";
       emptyElement.textContent = "Корзина пуста";
       this.basketContainer.append(emptyElement);
+      this.basketButton.disabled = value;
+    } else {
+      this.basketButton.disabled = value;
     }
   }
-
 }
