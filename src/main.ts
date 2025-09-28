@@ -9,7 +9,7 @@ import { API_URL } from "./utils/constants";
 import { Header } from "./components/view/Header";
 import { EventEmitter } from "./components/base/Events";
 import { ModalWindow } from "./components/view/ModalWindow";
-import { cloneTemplate } from "./utils/utils";
+import { cloneTemplate, ensureElement } from "./utils/utils";
 import { Gallery } from "./components/view/Gallery";
 import { CatalogCard } from "./components/view/CatalogCard";
 import { PreviewCard } from "./components/view/PreviewCard";
@@ -19,35 +19,36 @@ import { OrderSuccess } from "./components/view/OrderSuccess";
 import { ContactsForm, OrderForm } from "./components/view/Form";
 
 const events = new EventEmitter();
-const productsModel = new Catalog(events);
-const cart = new Cart(events);
-const buyer = new Buyer(events);
-
 const api = new Api(API_URL);
 const productsApi = new ProductsAPI(api);
 
+// Модель данных
+const productsModel = new Catalog(events);
+
 //Элементы разметки
 
-const cardCatalogTemplate = document.querySelector('#card-catalog') as HTMLTemplateElement;
-const modal = document.querySelector('.modal') as HTMLElement;
-const cardPreviewTemplate = document.querySelector('#card-preview') as HTMLTemplateElement;
-const basketTemplate = document.querySelector('#basket') as HTMLTemplateElement;
-const basketCardTemplate = document.querySelector('#card-basket') as HTMLTemplateElement;
-const orderTemplate = document.querySelector('#order') as HTMLTemplateElement;
-const contactsTemplate = document.querySelector('#contacts') as HTMLTemplateElement;
-const successTemplate = document.querySelector('#success') as HTMLTemplateElement;
+const cardCatalogTemplate = ensureElement<HTMLTemplateElement>('#card-catalog');
+const cardPreviewTemplate = ensureElement<HTMLTemplateElement>('#card-preview');
+const basketTemplate = ensureElement<HTMLTemplateElement>('#basket');
+const basketCardTemplate = ensureElement<HTMLTemplateElement>('#card-basket');
+const orderTemplate = ensureElement<HTMLTemplateElement>('#order');
+const contactsTemplate = ensureElement<HTMLTemplateElement>('#contacts');
+const successTemplate = ensureElement<HTMLTemplateElement>('#success');
+const modalContainer = ensureElement<HTMLElement>('.modal');
+const headerContainer = ensureElement<HTMLElement>('.header');
+const galleryContaier = ensureElement<HTMLElement>('.page__wrapper');
 
-//Модели
+// Экземпляры классов
 
-const gallery = new Gallery(document.querySelector('.page__wrapper') as HTMLElement);
-const header = new Header(document.querySelector('.header') as HTMLElement, events);
-const modalWindow = new ModalWindow(document.querySelector('.modal') as HTMLElement, events);
+const cart = new Cart(events);
+const buyer = new Buyer(events);
+const gallery = new Gallery(galleryContaier);
+const header = new Header(headerContainer, events);
+const modalWindow = new ModalWindow(modalContainer, events);
 const basket = new Basket(cloneTemplate(basketTemplate), events);
 const order = new OrderForm(cloneTemplate(orderTemplate), events);
 const contacts = new ContactsForm(cloneTemplate(contactsTemplate), events);
 const success = new OrderSuccess(cloneTemplate(successTemplate), events);
-
-// const basketCard = new BasketCard(cloneTemplate(basketCardTemplate));
 
 productsApi
   .getProducts()
@@ -94,17 +95,13 @@ events.on('card:select', (item: IProduct) => {
   }
   const cardElement = card.render(item);
   modalWindow.render({ content: cardElement });
-  events.emit('modal:visible');
-});
-
-events.on('modal:visible', () => {
-  modal.classList.toggle('modal_active');
+  modalWindow.open();
 });
 
 events.on('basket:open', () => {
   const basketElement = basket.render();
   modalWindow.render({ content: basketElement });
-  modal.classList.toggle('modal_active');
+  modalWindow.open();
   events.emit('cart:changed');
 })
 
@@ -144,30 +141,6 @@ events.on('order:open', () => {
   modalWindow.render({ content: orderForm });
 });
 
-events.on('contacts:submit', () => {
-  const total = cart.getTotalSum();
-  const items =  cart.getProducts().map(product => product.id);
-  const buyerData = buyer.getData();
-  const order = { total, items, ...buyerData };
-  // Отправляем заказ
-  console.log('Заказ отправлен:', order);
-  // Здесь можно добавить отправку на сервер
-  productsApi
-    .postOrder(order)
-    .then(data => console.log(data))
-    .catch((err) => console.log(err));
-  const successElement = success.render({ amount: total });
-  modalWindow.render({ content: successElement });
-})
-
-// events.on('formErrors:change', (errors: Partial<IBuyerValidation>) => {
-//     const { address, payment } = errors;
-//     const errorsElement = [address, payment].filter(value => value !== undefined);
-//     console.log('состояние валидации', !address && !payment)
-//     order.render({ errors: errorsElement, valid: !address && !payment })
-//     console.log(buyer.getData())
-
-// });
 
 events.on('formErrors:change', (errors: Partial<IBuyerValidation>) => {
     const { address, payment, email, phone } = errors;
@@ -199,135 +172,33 @@ events.on('order:submit', () => {
   modalWindow.render({content: contactsElement})
 })
 
-events.on('order:end', () => {
+events.on('contacts:submit', () => {
+  const total = cart.getTotalSum();
+  const items =  cart.getProducts().map(product => product.id);
+  const buyerData = buyer.getData();
+  const order = { total, items, ...buyerData };
+
+  productsApi
+    .postOrder(order)
+    .catch((err) => console.log(err));
+
+    const successElement = success.render({ amount: total });
+  modalWindow.render({ content: successElement });
   cart.clearCart();
-  events.emit('modal:visible');
 })
 
-
-//  buyer.saveData({payment: data.payment});
-
-// saveData(patch: Partial<IBuyer>): void {
-//     this.buyerData = { ...this.buyerData, ...patch };
-//   }
-
-// function validateOrderFields(): IBuyerValidation {
-//   const buyerData = buyer.getData();
-//   const validationData: IBuyerValidation = {} as IBuyerValidation;
-
-//   if (!buyerData.payment || buyerData.payment === ("" as PaymentMethod)) {
-//     validationData.payment = "Выберите способ оплаты";
-//   }
-
-//   if (!buyerData.address) {
-//     validationData.address = "Введите корректный адрес";
-//   }
-
-//   return validationData;
-// }
-
-// function isOrderFieldsValid(): boolean {
-//   const errors = validateOrderFields();
-//   return Object.keys(errors).length === 0;
-// }
-
-// function updateForm(formName: string, validation: IBuyerValidation, isValid: boolean) {
-//   const formData = {
-//     ...buyer.getData(),
-//     errors: validation,
-//     valid: isValid,
-//     buttonState: isValid
-//   };
-
-//   if (formName === 'order') {
-//     const orderForm = order.render(formData);
-//     modalWindow.render({ content: orderForm });
-//   } else if (formName === 'contacts') {
-//     const contactsForm = contacts.render(formData);
-//     modalWindow.render({ content: contactsForm });
-//   }
-// }
-
-// // Общий обработчик для всех форм
-// events.on('form:submit', (data: { formName: string }) => {
-//   const validation = buyer.validateData();
-//   const isValid = buyer.isValid();
-
-//   if (data.formName === 'order') {
-//     const orderValidation = validateOrderFields();
-//     const isOrderValid = isOrderFieldsValid();
-
-//     if (isOrderValid) {
-//       // Переходим к форме контактов
-//       const contactsForm = contacts.render({
-//         ...buyer.getData(),
-//         errors: {} as IBuyerValidation,
-//         valid: true,
-//         buttonState: false
-//       });
-//       modalWindow.render({ content: contactsForm });
-//     } else {
-//       updateForm('order', orderValidation, isOrderValid);
-//     }
-//   } else if (data.formName === 'contacts') {
-//     if (isValid) {
-//       const total = cart.getTotalSum();
-//       const items =  cart.getProducts().map(product => product.id);
-//       const buyerData = buyer.getData();
-//       const order = { total, items, ...buyerData };
-//       // Отправляем заказ
-//       console.log('Заказ отправлен:', order);
-//       // Здесь можно добавить отправку на сервер
-//       productsApi.postOrder(order)
-//         .then(data => console.log(data));
-
-//       const successElement = success.render({amount: total });
-//       modalWindow.render({ content: successElement });
-
-//     } else {
-//       updateForm('contacts', validation, isValid);
-//     }
-//   }
-// })
-
-// events.on('order:payment:change', (data: { payment: PaymentMethod }) => {
-//   buyer.saveData({payment: data.payment});
-//   const validation = validateOrderFields();
-//   const isValid = isOrderFieldsValid();
-//   updateForm('order', validation, isValid);
-// })
-
-// events.on('order:address:change', (data: { address: string }) => {
-//   buyer.saveData({ address: data.address });
-//   const validation = validateOrderFields();
-//   const isValid = isOrderFieldsValid();
-//   updateForm('order', validation, isValid);
-// });
-
-// // Обработчики для формы контактов
-// events.on('contacts:email:change', (data: { email: string }) => {
-//   buyer.saveData({ email: data.email });
-//   const validation = buyer.validateData();
-//   const isValid = buyer.isValid();
-//   updateForm('contacts', validation, isValid);
-// });
-
-// events.on('contacts:phone:change', (data: { phone: string }) => {
-//   buyer.saveData({ phone: data.phone });
-//   const validation = buyer.validateData();
-//   const isValid = buyer.isValid();
-//   updateForm('contacts', validation, isValid);
-// });
-
+events.on('order:end', () => {
+  modalWindow.close();
+})
 
 
 
 
 // ВСЕ СОБЫТИЯ В КОНСОЛЬ
 
-events.onAll(({ eventName, data }) => {
-    console.log(eventName, data); // все события в консоль
-})
+// events.onAll(({ eventName, data }) => {
+//     console.log(eventName, data); // все события в консоль
+// })
 
 
 

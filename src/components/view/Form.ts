@@ -11,12 +11,14 @@ export interface IBaseForm {
 export class BaseForm<T extends IBaseForm> extends Component<T> {
   protected submit: HTMLButtonElement;
   protected errorsForm: HTMLElement;
+  protected errorElement: HTMLElement;
 
   constructor(protected container: HTMLFormElement, protected events: EventEmitter) {
     super(container);
 
     this.submit = ensureElement<HTMLButtonElement>('button[type=submit]', this.container);
     this.errorsForm = ensureElement<HTMLElement>('.form__errors', this.container);
+    this.errorElement = document.createElement('p') as HTMLElement;
 
     this.container.addEventListener('input', (e: Event) => {
       const target = e.target as HTMLInputElement;
@@ -44,7 +46,7 @@ export class BaseForm<T extends IBaseForm> extends Component<T> {
   }
 
   set errors(value: string[]) {
-    this.setText(this.errorsForm, value.join(' '));
+    this.setText(this.errorsForm, value.join(', '));
   }
 
 }

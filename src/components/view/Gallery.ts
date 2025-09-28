@@ -3,6 +3,7 @@ import { Component } from "../base/Component";
 
 interface IGallery {
   catalog: HTMLElement[];
+  locked: boolean;
 }
 
 export class Gallery extends Component<IGallery> {
@@ -16,4 +17,5 @@ export class Gallery extends Component<IGallery> {
   set catalog(items: HTMLElement[]) {
     this.catalogElement.replaceChildren(...items);
   }
+
 }
