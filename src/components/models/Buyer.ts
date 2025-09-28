@@ -15,6 +15,7 @@ export class Buyer {
 
   saveData(patch: Partial<IBuyer>): void {
     this.buyerData = { ...this.buyerData, ...patch };
+    this.validateOrder();
   }
 
   getData(): IBuyer {

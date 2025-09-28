@@ -32,11 +32,17 @@ export class ModalWindow extends Component<IModalWindow> {
 
   open() {
     this.container.classList.add("modal_active");
+    this.container.style.overflowY = 'auto'
+    this.modalContainer.style.overflowY = 'visible';
+
     this.events.emit("modal:open");
   }
 
   close() {
     this.container.classList.remove("modal_active");
+    this.modalContainer.style.overflowY = '';
+    this.container.style.overflowY = '';
+
     this.events.emit("modal:close");
   }
 }

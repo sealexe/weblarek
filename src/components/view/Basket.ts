@@ -6,8 +6,8 @@ interface IBasket {
   basketList: HTMLElement[];
   basketEmptyElement: HTMLElement;
   total: number;
-  disabled: string;
-  abled: string;
+  valid: boolean;
+  empty: boolean;
 }
 
 export class Basket extends Component<IBasket> {
@@ -35,23 +35,26 @@ export class Basket extends Component<IBasket> {
     );
   }
 
-  set basketEmptyElement(value: HTMLElement) {
-    this.basketContainer.replaceChildren(value);
-  }
-
-  set basketList(items: HTMLElement[]) {
+   set basketList(items: HTMLElement[]) {
     this.basketContainer.replaceChildren(...items);
+
   }
 
   set total(value: number) {
     this.setText(this.totalPrice, `${value} синапсов`);
   }
 
-  set disabled(value: string) {
-    this.basketButton.setAttribute(value, value);
+  set valid(value: boolean) {
+    this.basketButton.disabled = value;
   }
 
-  set abled(value: string) {
-    this.basketButton.removeAttribute(value);
+  set empty(value: boolean) {
+    if (value) {
+      const emptyElement = document.createElement("p");
+      emptyElement.style.color = "rgba(255, 255, 255, 0.3)";
+      emptyElement.textContent = "Корзина пуста";
+      this.basketContainer.append(emptyElement);
+    }
   }
+
 }

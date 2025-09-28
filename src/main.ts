@@ -6,17 +6,17 @@ import { ProductsAPI } from "./components/models/ProductsApi";
 import "./scss/styles.scss";
 import { IBuyer, IBuyerValidation, IProduct, PaymentMethod } from "./types";
 import { API_URL } from "./utils/constants";
-import { Header } from "./components/view/Header";
 import { EventEmitter } from "./components/base/Events";
 import { ModalWindow } from "./components/view/ModalWindow";
 import { cloneTemplate, ensureElement } from "./utils/utils";
-import { Gallery } from "./components/view/Gallery";
 import { CatalogCard } from "./components/view/CatalogCard";
 import { PreviewCard } from "./components/view/PreviewCard";
 import { Basket } from "./components/view/Basket";
 import { BasketCard } from "./components/view/BasketCard";
 import { OrderSuccess } from "./components/view/OrderSuccess";
 import { ContactsForm, OrderForm } from "./components/view/Form";
+import { Gallery } from "./components/view/Gallery";
+import { Header } from "./components/view/Header";
 
 const events = new EventEmitter();
 const api = new Api(API_URL);
@@ -43,13 +43,13 @@ const galleryContaier = ensureElement<HTMLElement>(".page__wrapper");
 
 const cart = new Cart(events);
 const buyer = new Buyer(events);
-const gallery = new Gallery(galleryContaier);
-const header = new Header(headerContainer, events);
 const modalWindow = new ModalWindow(modalContainer, events);
 const basket = new Basket(cloneTemplate(basketTemplate), events);
 const order = new OrderForm(cloneTemplate(orderTemplate), events);
 const contacts = new ContactsForm(cloneTemplate(contactsTemplate), events);
 const success = new OrderSuccess(cloneTemplate(successTemplate), events);
+const gallery = new Gallery(galleryContaier);
+const header = new Header(headerContainer, events);
 
 productsApi
   .getProducts()
@@ -109,29 +109,23 @@ events.on("basket:open", () => {
 });
 
 events.on("cart:changed", () => {
+  const cartProducts = cart.getProducts();
   const totalSum = cart.getTotalSum();
-  const total = cart.getTotal();
-  const basketCards = cart.getProducts().map((item, idx) => {
+  const productstotal = cart.getTotal();
+  const basketCards = cartProducts.map((item, idx) => {
     const basketCard = new BasketCard(cloneTemplate(basketCardTemplate), {
       delClick: () => events.emit("product:delete", item),
     });
     basketCard.render({ index: idx + 1 });
     return basketCard.render(item);
   });
-  if (cart.getProducts().length === 0) {
-    const emptyElement = document.createElement("p");
-    emptyElement.style.color = "rgba(255, 255, 255, 0.3)";
-    emptyElement.textContent = "Корзина пуста";
-    basket.render({ basketEmptyElement: emptyElement, disabled: "disabled" });
-    header.render({ counter: total });
-  } else {
-    basket.render({
-      basketList: basketCards,
-      total: totalSum,
-      abled: "disabled",
-    });
-    header.render({ counter: total });
-  }
+  basket.render({
+    basketList: basketCards,
+    total: totalSum,
+    valid: !productstotal,
+    empty: !productstotal
+  });
+  header.render({ counter: productstotal });
 });
 
 events.on("product:delete", (item: IProduct) => {
@@ -149,7 +143,6 @@ events.on("order:open", () => {
 
 events.on("formErrors:change", (errors: Partial<IBuyerValidation>) => {
   const { address, payment, email, phone } = errors;
-
   const orderErrors = [address, payment].filter((value) => value !== undefined);
   const contactsErrors = [email, phone].filter((value) => value !== undefined);
 
@@ -187,14 +180,26 @@ events.on("contacts:submit", () => {
   const buyerData = buyer.getData();
   const order = { total, items, ...buyerData };
 
-  productsApi.postOrder(order).catch((err) => console.log(err));
-
-  const successElement = success.render({ amount: total });
-  modalWindow.render({ content: successElement });
-  cart.clearCart();
-  buyer.clearData();
+  productsApi.postOrder(order)
+    .then((data) => {
+      const successElement = success.render({ amount: data.total });
+      modalWindow.render({ content: successElement });
+      cart.clearCart();
+      buyer.clearData();
+    })
+    .catch((err) => console.log(err));
 });
 
 events.on("order:end", () => {
   modalWindow.close();
 });
+
+events.on('modal:open', () => {
+    gallery.locked = true;
+});
+
+events.on('modal:close', () => {
+    gallery.locked = false;
+});
+
+

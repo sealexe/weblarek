@@ -20,4 +20,12 @@ export class Gallery extends Component<IGallery> {
   set catalog(items: HTMLElement[]) {
     this.catalogElement.replaceChildren(...items);
   }
+
+  set locked(value: boolean) {
+    if (value) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }
 }
