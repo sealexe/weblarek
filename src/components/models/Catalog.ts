@@ -1,5 +1,5 @@
 import { IProduct } from "../../types";
-import { IEvents } from "../base/Events";
+import { EventEmitter } from "../base/Events";
 
 export class Catalog {
   protected products: IProduct[] = [];
@@ -12,7 +12,7 @@ export class Catalog {
     price: null,
   };
 
-  constructor(protected events: IEvents) { }
+  constructor(protected events: EventEmitter) { }
 
   setProducts(products: IProduct[]) {
     this.products = products;

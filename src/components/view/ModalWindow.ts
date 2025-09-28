@@ -35,5 +35,4 @@ export class ModalWindow extends Component<IModalWindow> {
     this.events.emit('modal:close');
   }
 
-
 }

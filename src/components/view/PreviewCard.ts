@@ -1,6 +1,5 @@
 import { ICardActions } from "../../types";
 import { ensureElement } from "../../utils/utils";
-import { EventEmitter } from "../base/Events";
 import { CatalogCard, ICatalogCard } from "./CatalogCard";
 
 interface IPrewiewCard extends ICatalogCard {
