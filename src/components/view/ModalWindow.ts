@@ -12,13 +12,18 @@ export class ModalWindow extends Component<IModalWindow> {
 
   constructor(container: HTMLElement, protected events: EventEmitter) {
     super(container);
-    this.modalContainer = ensureElement<HTMLElement>('.modal__content', this.container);
-    this.closeButton = ensureElement<HTMLButtonElement>('.modal__close', this.container);
+    this.modalContainer = ensureElement<HTMLElement>(
+      ".modal__content",
+      this.container
+    );
+    this.closeButton = ensureElement<HTMLButtonElement>(
+      ".modal__close",
+      this.container
+    );
 
-    this.closeButton.addEventListener('click', () => this.close.bind(this));
-    this.container.addEventListener('click', this.close.bind(this));
-    this.modalContainer.addEventListener('click', (e) => e.stopPropagation());
-
+    this.closeButton.addEventListener("click", () => this.close.bind(this));
+    this.container.addEventListener("click", this.close.bind(this));
+    this.modalContainer.addEventListener("click", (e) => e.stopPropagation());
   }
 
   set content(value: HTMLElement) {
@@ -26,13 +31,12 @@ export class ModalWindow extends Component<IModalWindow> {
   }
 
   open() {
-    this.container.classList.add('modal_active');
-    this.events.emit('modal:open');
+    this.container.classList.add("modal_active");
+    this.events.emit("modal:open");
   }
 
   close() {
-    this.container.classList.remove('modal_active');
-    this.events.emit('modal:close');
+    this.container.classList.remove("modal_active");
+    this.events.emit("modal:close");
   }
-
 }

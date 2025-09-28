@@ -13,15 +13,21 @@ export class BasketCard extends BaseCard<IBasketCard> {
   constructor(container: HTMLElement, actions?: ICardActions) {
     super(container);
 
-    this.basketDeleteButton = ensureElement<HTMLButtonElement>('.basket__item-delete', this.container);
-    this.itemIndex = ensureElement<HTMLElement>('.basket__item-index', this.container);
+    this.basketDeleteButton = ensureElement<HTMLButtonElement>(
+      ".basket__item-delete",
+      this.container
+    );
+    this.itemIndex = ensureElement<HTMLElement>(
+      ".basket__item-index",
+      this.container
+    );
 
     if (actions?.delClick) {
-      this.basketDeleteButton.addEventListener('click', actions.delClick);
+      this.basketDeleteButton.addEventListener("click", actions.delClick);
     }
   }
 
   set index(value: number) {
-      this.setText(this.itemIndex, value);
+    this.setText(this.itemIndex, value);
   }
 }

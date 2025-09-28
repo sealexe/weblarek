@@ -17,17 +17,22 @@ export class CatalogCard<T extends ICatalogCard> extends BaseCard<T> {
   constructor(container: HTMLElement, actions?: ICardActions) {
     super(container);
 
-    this.cardImage = ensureElement<HTMLImageElement>('.card__image', this.container);
-    this.cardCategory = ensureElement<HTMLElement>('.card__category', this.container);
+    this.cardImage = ensureElement<HTMLImageElement>(
+      ".card__image",
+      this.container
+    );
+    this.cardCategory = ensureElement<HTMLElement>(
+      ".card__category",
+      this.container
+    );
 
     if (actions?.onClick) {
-      this.container.addEventListener('click', actions.onClick);
+      this.container.addEventListener("click", actions.onClick);
     }
-
   }
 
   set image(value: string) {
-    this.setImage(this.cardImage, CDN_URL + value.replace('svg', 'png'));
+    this.setImage(this.cardImage, CDN_URL + value.replace("svg", "png"));
   }
 
   set category(value: string) {
@@ -41,5 +46,3 @@ export class CatalogCard<T extends ICatalogCard> extends BaseCard<T> {
     }
   }
 }
-
-

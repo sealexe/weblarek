@@ -12,17 +12,17 @@ export class BaseCard<T extends IBaseCard> extends Component<T> {
 
   constructor(container: HTMLElement) {
     super(container);
-    this.cardTitle = ensureElement<HTMLElement>('.card__title', this.container);
-    this.cardPrice = ensureElement<HTMLElement>('.card__price', this.container);
+    this.cardTitle = ensureElement<HTMLElement>(".card__title", this.container);
+    this.cardPrice = ensureElement<HTMLElement>(".card__price", this.container);
   }
 
-  set title(value: string){
+  set title(value: string) {
     this.setText(this.cardTitle, value);
   }
 
   set price(value: number | null) {
     if (value === null) {
-      this.setText(this.cardPrice, 'Бесценно')
+      this.setText(this.cardPrice, "Бесценно");
     } else {
       this.setText(this.cardPrice, `${value} синапсов`);
     }

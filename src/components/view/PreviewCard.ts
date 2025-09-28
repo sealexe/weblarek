@@ -14,13 +14,18 @@ export class PreviewCard extends CatalogCard<IPrewiewCard> {
 
   constructor(container: HTMLElement, actions?: ICardActions) {
     super(container);
-    this.cardDescription = ensureElement<HTMLElement>('.card__text', this.container);
-    this.addDeleteButton = ensureElement<HTMLButtonElement>('.card__button', this.container);
+    this.cardDescription = ensureElement<HTMLElement>(
+      ".card__text",
+      this.container
+    );
+    this.addDeleteButton = ensureElement<HTMLButtonElement>(
+      ".card__button",
+      this.container
+    );
 
     if (actions?.addClick) {
-      this.addDeleteButton.addEventListener('click', actions.addClick);
+      this.addDeleteButton.addEventListener("click", actions.addClick);
     }
-
   }
 
   set description(value: string) {

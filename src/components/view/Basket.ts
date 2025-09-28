@@ -17,11 +17,22 @@ export class Basket extends Component<IBasket> {
 
   constructor(container: HTMLElement, protected events: EventEmitter) {
     super(container);
-    this.basketContainer = ensureElement<HTMLElement>('.basket__list', this.container);
-    this.totalPrice = ensureElement<HTMLElement>('.basket__price', this.container);
-    this.basketButton = ensureElement<HTMLButtonElement>('.basket__button', this.container);
+    this.basketContainer = ensureElement<HTMLElement>(
+      ".basket__list",
+      this.container
+    );
+    this.totalPrice = ensureElement<HTMLElement>(
+      ".basket__price",
+      this.container
+    );
+    this.basketButton = ensureElement<HTMLButtonElement>(
+      ".basket__button",
+      this.container
+    );
 
-    this.basketButton.addEventListener('click', () => this.events.emit('order:open'))
+    this.basketButton.addEventListener("click", () =>
+      this.events.emit("order:open")
+    );
   }
 
   set basketEmptyElement(value: HTMLElement) {

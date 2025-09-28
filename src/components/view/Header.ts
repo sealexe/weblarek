@@ -13,17 +13,21 @@ export class Header extends Component<IHeader> {
   constructor(container: HTMLElement, protected events: EventEmitter) {
     super(container);
 
-    this.basketButton = ensureElement<HTMLButtonElement>('.header__basket', this.container);
-    this.counterElement = ensureElement<HTMLElement>('.header__basket-counter', this.container);
+    this.basketButton = ensureElement<HTMLButtonElement>(
+      ".header__basket",
+      this.container
+    );
+    this.counterElement = ensureElement<HTMLElement>(
+      ".header__basket-counter",
+      this.container
+    );
 
-    this.basketButton.addEventListener('click', () => {
-      this.events.emit('basket:open');
-    })
+    this.basketButton.addEventListener("click", () => {
+      this.events.emit("basket:open");
+    });
   }
 
   set counter(value: number) {
     this.setText(this.counterElement, value);
   }
 }
-
-

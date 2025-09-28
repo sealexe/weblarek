@@ -13,31 +13,39 @@ export class BaseForm<T extends IBaseForm> extends Component<T> {
   protected errorsForm: HTMLElement;
   protected errorElement: HTMLElement;
 
-  constructor(protected container: HTMLFormElement, protected events: EventEmitter) {
+  constructor(
+    protected container: HTMLFormElement,
+    protected events: EventEmitter
+  ) {
     super(container);
 
-    this.submit = ensureElement<HTMLButtonElement>('button[type=submit]', this.container);
-    this.errorsForm = ensureElement<HTMLElement>('.form__errors', this.container);
-    this.errorElement = document.createElement('p') as HTMLElement;
+    this.submit = ensureElement<HTMLButtonElement>(
+      "button[type=submit]",
+      this.container
+    );
+    this.errorsForm = ensureElement<HTMLElement>(
+      ".form__errors",
+      this.container
+    );
+    this.errorElement = document.createElement("p") as HTMLElement;
 
-    this.container.addEventListener('input', (e: Event) => {
+    this.container.addEventListener("input", (e: Event) => {
       const target = e.target as HTMLInputElement;
       const field = target.name as keyof T;
       const value = target.value;
       this.onInputChange(field, value);
     });
 
-    this.container.addEventListener('submit', (e) => {
-        e.preventDefault();
-        this.events.emit(`${this.container.name}:submit`);
+    this.container.addEventListener("submit", (e) => {
+      e.preventDefault();
+      this.events.emit(`${this.container.name}:submit`);
     });
-
   }
 
   protected onInputChange(field: keyof T, value: string) {
     this.events.emit(`${this.container.name}.${String(field)}:change`, {
-        field,
-        value
+      field,
+      value,
     });
   }
 
@@ -46,9 +54,8 @@ export class BaseForm<T extends IBaseForm> extends Component<T> {
   }
 
   set errors(value: string[]) {
-    this.setText(this.errorsForm, value.join(', '));
+    this.setText(this.errorsForm, value.join(", "));
   }
-
 }
 
 interface IOrderForm extends IBaseForm {
@@ -61,37 +68,50 @@ export class OrderForm extends BaseForm<IOrderForm> {
   protected cardButton: HTMLButtonElement;
   protected addressInput: HTMLInputElement;
 
-
   constructor(protected container: HTMLFormElement, events: EventEmitter) {
-    super(container, events)
+    super(container, events);
 
-    this.cashButton = ensureElement<HTMLButtonElement>('button[name="cash"]', this.container);
-    this.cardButton = ensureElement<HTMLButtonElement>('button[name="card"]', this.container);
-    this.addressInput = ensureElement<HTMLInputElement>('input[name="address"]', this.container);
+    this.cashButton = ensureElement<HTMLButtonElement>(
+      'button[name="cash"]',
+      this.container
+    );
+    this.cardButton = ensureElement<HTMLButtonElement>(
+      'button[name="card"]',
+      this.container
+    );
+    this.addressInput = ensureElement<HTMLInputElement>(
+      'input[name="address"]',
+      this.container
+    );
 
-    this.cashButton.addEventListener('click', () => {
-      this.events.emit('order.payment:change', { payment: PaymentMethod.Cash });
+    this.cashButton.addEventListener("click", () => {
+      this.events.emit("order.payment:change", { payment: PaymentMethod.Cash });
     });
 
-    this.cardButton.addEventListener('click', () => {
-      this.events.emit('order.payment:change', { payment: PaymentMethod.Card });
+    this.cardButton.addEventListener("click", () => {
+      this.events.emit("order.payment:change", { payment: PaymentMethod.Card });
     });
   }
 
   set payment(value: string) {
+    this.toggleClass(this.cashButton, "button_alt-active", false);
+    this.toggleClass(this.cardButton, "button_alt-active", false);
 
-    this.toggleClass(this.cashButton, 'button_alt-active', false);
-    this.toggleClass(this.cardButton, 'button_alt-active', false);
-
-    this.toggleClass(this.cashButton, 'button_alt-active', value === PaymentMethod.Cash);
-    this.toggleClass(this.cardButton, 'button_alt-active', value === PaymentMethod.Card);
-
+    this.toggleClass(
+      this.cashButton,
+      "button_alt-active",
+      value === PaymentMethod.Cash
+    );
+    this.toggleClass(
+      this.cardButton,
+      "button_alt-active",
+      value === PaymentMethod.Card
+    );
   }
 
   set address(value: string) {
     this.addressInput.value = value;
   }
-
 }
 
 interface IContactsForm extends IBaseForm {
@@ -104,13 +124,24 @@ export class ContactsForm extends BaseForm<IContactsForm> {
   protected phoneInput: HTMLInputElement;
   protected payButton: HTMLButtonElement;
 
-  constructor(protected container: HTMLFormElement, protected events: EventEmitter) {
+  constructor(
+    protected container: HTMLFormElement,
+    protected events: EventEmitter
+  ) {
     super(container, events);
 
-    this.emailInput = ensureElement<HTMLInputElement>('input[name="email"]', this.container);
-    this.phoneInput = ensureElement<HTMLInputElement>('input[name="phone"]', this.container);
-    this.payButton = ensureElement<HTMLButtonElement>('button[type="submit"]', this.container);
-
+    this.emailInput = ensureElement<HTMLInputElement>(
+      'input[name="email"]',
+      this.container
+    );
+    this.phoneInput = ensureElement<HTMLInputElement>(
+      'input[name="phone"]',
+      this.container
+    );
+    this.payButton = ensureElement<HTMLButtonElement>(
+      'button[type="submit"]',
+      this.container
+    );
   }
 
   set email(value: string) {
@@ -120,5 +151,4 @@ export class ContactsForm extends BaseForm<IContactsForm> {
   set phone(value: string) {
     this.phoneInput.value = value;
   }
-
 }
